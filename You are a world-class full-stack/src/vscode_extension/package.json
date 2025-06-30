@@ -1,0 +1,160 @@
+{
+  "name": "enterprise-ai-coding-assistant",
+  "displayName": "Enterprise AI Coding Assistant",
+  "description": "Self-hosted AI coding assistant for enterprises",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Machine Learning",
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "enterprise-ai-coding-assistant.login",
+        "title": "AI Coding Assistant: Login"
+      },
+      {
+        "command": "enterprise-ai-coding-assistant.logout",
+        "title": "AI Coding Assistant: Logout"
+      },
+      {
+        "command": "enterprise-ai-coding-assistant.showChat",
+        "title": "AI Coding Assistant: Open Chat"
+      },
+      {
+        "command": "enterprise-ai-coding-assistant.generateCode",
+        "title": "AI Coding Assistant: Generate Code"
+      },
+      {
+        "command": "enterprise-ai-coding-assistant.explainCode",
+        "title": "AI Coding Assistant: Explain Selected Code"
+      },
+      {
+        "command": "enterprise-ai-coding-assistant.switchModel",
+        "title": "AI Coding Assistant: Switch Model"
+      },
+      {
+        "command": "enterprise-ai-coding-assistant.settings",
+        "title": "AI Coding Assistant: Settings"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "enterprise-ai-coding-assistant.generateCode",
+          "when": "editorTextFocus",
+          "group": "navigation"
+        },
+        {
+          "command": "enterprise-ai-coding-assistant.explainCode",
+          "when": "editorHasSelection",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Enterprise AI Coding Assistant",
+      "properties": {
+        "enterprise-ai-coding-assistant.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "URL of the AI Coding Assistant server"
+        },
+        "enterprise-ai-coding-assistant.authUrl": {
+          "type": "string",
+          "default": "http://localhost:8001",
+          "description": "URL of the authentication server"
+        },
+        "enterprise-ai-coding-assistant.modelManagerUrl": {
+          "type": "string",
+          "default": "http://localhost:8002",
+          "description": "URL of the model manager server"
+        },
+        "enterprise-ai-coding-assistant.inlineSuggestions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable inline code suggestions"
+        },
+        "enterprise-ai-coding-assistant.suggestionDelay": {
+          "type": "number",
+          "default": 500,
+          "description": "Delay in milliseconds before showing suggestions"
+        },
+        "enterprise-ai-coding-assistant.maxTokens": {
+          "type": "number",
+          "default": 256,
+          "description": "Maximum number of tokens to generate for code completions"
+        },
+        "enterprise-ai-coding-assistant.temperature": {
+          "type": "number",
+          "default": 0.2,
+          "description": "Temperature for code generation (0.0-1.0)"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "enterprise-ai-coding-assistant",
+          "title": "AI Coding Assistant",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "enterprise-ai-coding-assistant": [
+        {
+          "id": "aiCodingAssistantChat",
+          "name": "Chat"
+        },
+        {
+          "id": "aiCodingAssistantModels",
+          "name": "Models"
+        },
+        {
+          "id": "aiCodingAssistantSettings",
+          "name": "Settings"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.39.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.0.4",
+    "webpack": "^5.81.0",
+    "webpack-cli": "^5.0.2"
+  },
+  "dependencies": {
+    "axios": "^1.5.0",
+    "vscode-languageclient": "^8.1.0"
+  }
+}

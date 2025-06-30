@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: ai_coding_assistant_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aicodingassistant
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    # GPU support disabled for CPU-only environments
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  llm_server:
+    build:
+      context: ./src/llm_server
+      dockerfile: Dockerfile
+    container_name: llm_server
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_API_URL=http://ollama:11434
+      - LOG_LEVEL=INFO
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  user_auth:
+    build:
+      context: ./src/user_auth
+      dockerfile: Dockerfile
+    container_name: user_auth
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/aicodingassistant
+      - JWT_SECRET_KEY=change_this_to_a_secure_random_key_in_production
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  model_manager:
+    build:
+      context: ./src/model_manager
+      dockerfile: Dockerfile
+    container_name: model_manager
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/aicodingassistant
+      - OLLAMA_API_URL=http://ollama:11434
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+    depends_on:
+      - db
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  ollama_data:
+    driver: local
